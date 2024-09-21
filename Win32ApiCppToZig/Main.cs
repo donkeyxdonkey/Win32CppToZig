@@ -42,35 +42,42 @@ public partial class Main : Form
         bool isDataType = true;
         bool isOptional = false;
 
-        for (int i = 2; i < tokens.Length; i++)
+        try
         {
-            if (tokens[i] == OPTIONAL)
+            for (int i = 2; i < tokens.Length; i++)
             {
-                isOptional = true;
-                continue;
+                if (tokens[i] == OPTIONAL)
+                {
+                    isOptional = true;
+                    continue;
+                }
+
+                switch (isDataType)
+                {
+                    case true:
+                        dataType = $"{(isOptional ? "?" : "")}{(typeMap.TryGetValue(tokens[i], out string? value) ? value : tokens[i])}";
+                        break;
+                    case false:
+                        string param = tokens[i];
+
+                        zigFunction.Append($"{param}: {dataType}, ");
+                        break;
+                }
+
+                isDataType = !isDataType;
+                isOptional = false;
             }
+            zigFunction.Length -= 2;
+            zigFunction.Append($") callconv(WINAPI) {returnType};");
 
-            switch (isDataType)
-            {
-                case true:
-                    dataType = $"{(isOptional ? "?" : "")}{(typeMap.TryGetValue(tokens[i], out string? value) ? value : tokens[i])}";
-                    break;
-                case false:
-                    string param = tokens[i];
-
-                    zigFunction.Append($"{param}: {dataType}, ");
-                    break;
-            }
-
-            isDataType = !isDataType;
-            isOptional = false;
+            TB_Output.Text = zigFunction.ToString();
+            Clipboard.SetText(TB_Output.Text);
+            ShowMessage("Conversion copied to clipboard");
         }
-        zigFunction.Length -= 2;
-        zigFunction.Append($") callconv(WINAPI) {returnType};");
-
-        TB_Output.Text = zigFunction.ToString();
-        Clipboard.SetText(TB_Output.Text);
-        ShowMessage("Conversion copied to clipboard");
+        catch (Exception ex)
+        {
+            ShowMessage(ex.Message);
+        }
     }
 
     private void ShowMessage(string message)
