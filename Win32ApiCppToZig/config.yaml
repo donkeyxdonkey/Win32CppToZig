@@ -1,0 +1,5 @@
+﻿Types:
+  - InType: int
+    OutType: int32
+  - InType: float
+    OutType: f32
